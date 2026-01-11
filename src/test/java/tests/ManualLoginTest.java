@@ -3,30 +3,31 @@ package tests;
 import base.BaseTest;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import utils.TestData;
 
 import java.time.Duration;
+import java.util.Scanner;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class Test02_Login extends BaseTest {
+public class ManualLoginTest extends BaseTest {
 
     @Test
-    void testLogin() {
-        System.out.println("=== Test 2: Login ===");
+    void manualLoginTest() {
+        System.out.println("=== MANUAL LOGIN TEST ===");
+        System.out.println("Kjo është për të testuar manualisht login-in");
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
-        JavascriptExecutor js = (JavascriptExecutor) driver;
 
         try {
+            // Hapi 1: Shko në faqen kryesore
+            driver.get(TestData.BASE_URL);
             Thread.sleep(3000);
 
-            // Hapi 1: Kliko Account -> Login
-            System.out.println("Hapi 1: Kliko Account -> Login");
+            // Hapi 2: Kliko Account -> Login
             WebElement accountLink = wait.until(ExpectedConditions.elementToBeClickable(
                     By.xpath("//span[text()='Account']")
             ));
@@ -39,20 +40,19 @@ public class Test02_Login extends BaseTest {
             loginLink.click();
             Thread.sleep(3000);
 
-            // Hapi 2: Login me credentials të ruajtura
-            System.out.println("Hapi 2: Login");
+            // Hapi 3: Jepi përdoruesit mundësinë të vendosë credentialet
+            Scanner scanner = new Scanner(System.in);
 
-            // Përdor metodat e reja që marrin credentialet e ruajtura
-            String email = TestData.getEmailForLogin();
-            String password = TestData.getPasswordForLogin();
+            System.out.println("=== VENDOS CREDENTIALET ===");
+            System.out.print("Email: ");
+            String email = scanner.nextLine();
 
-            System.out.println("========================================");
-            System.out.println("DUKE PËRPJETË TË LOGIN ME:");
-            System.out.println("Email: " + email);
-            System.out.println("Password: " + "***" + password.substring(Math.max(0, password.length() - 3)));
-            System.out.println("========================================");
+            System.out.print("Password: ");
+            String password = scanner.nextLine();
 
-            // Plotëso formën
+            System.out.println("===========================");
+
+            // Hapi 4: Plotëso formën
             WebElement emailField = wait.until(ExpectedConditions.visibilityOfElementLocated(
                     By.id("email")
             ));
@@ -63,13 +63,12 @@ public class Test02_Login extends BaseTest {
             passwordField.clear();
             passwordField.sendKeys(password);
 
-            // Kliko Login
+            // Hapi 5: Kliko Login
             WebElement loginButton = driver.findElement(By.id("send2"));
             loginButton.click();
             Thread.sleep(5000);
 
-            // Hapi 3: Kontrollo login
-            System.out.println("Hapi 3: Kontrollo login");
+            // Hapi 6: Kontrollo nëse login-i është i suksesshëm
             String currentUrl = driver.getCurrentUrl();
             String pageSource = driver.getPageSource().toLowerCase();
 
@@ -81,6 +80,11 @@ public class Test02_Login extends BaseTest {
 
             if (loggedIn) {
                 System.out.println("LOGIN I SUKSESSHËM!");
+                System.out.println("Email: " + email);
+                System.out.println("Password: " + password);
+
+                // Ruaj credentialet për testet e tjera
+                TestData.setRegisteredCredentials(email, password);
 
                 // Logout
                 WebElement accountLink2 = wait.until(ExpectedConditions.elementToBeClickable(
@@ -95,24 +99,20 @@ public class Test02_Login extends BaseTest {
                 logoutLink.click();
                 Thread.sleep(2000);
 
-                System.out.println("=== Test 2 KALOI ===");
-                assertTrue(true, "Login successful");
+                System.out.println("Credentialet u ruajtën me sukses!");
+                assertTrue(true, "Manual login successful");
             } else {
                 System.out.println("LOGIN DËSHTOI!");
-                System.out.println("Ju lutem:");
-                System.out.println("1. Ekzekutoni ManualLoginTest për të regjistruar credentialet tuaja");
-                System.out.println("2. Ose vendosni credentialet në skedarin test_config.properties");
-                System.out.println("3. Ose ekzekutoni testin me: -Dmanual_email=email -Dmanual_password=password");
-
-                // Për testin e ardhshëm, thjesht kalojmë
-                System.out.println("Testi kalon për të vazhduar me të tjerët");
-                assertTrue(true, "Login test - will continue with other tests");
+                System.out.println("Ju lutem kontrolloni credentialet tuaja.");
+                assertTrue(false, "Manual login failed");
             }
 
+            scanner.close();
+
         } catch (Exception e) {
-            System.out.println("Testi dështoi me exception: " + e.getMessage());
+            System.out.println("Gabim: " + e.getMessage());
             e.printStackTrace();
-            assertTrue(true, "Test failed but continuing");
+            assertTrue(false, "Test failed with exception");
         }
     }
 }

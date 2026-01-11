@@ -10,15 +10,22 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 
 public class HomePage {
-
     private WebDriver driver;
     private WebDriverWait wait;
     private Actions actions;
 
-    private By account = By.xpath("//span[text()='Account']");
-    private By login = By.linkText("Log In");
-    private By register = By.linkText("Register");
-    private By logout = By.linkText("Log Out");
+    // Locators
+    private By accountLink = By.cssSelector(".skip-link.skip-account .label");
+    private By registerLink = By.linkText("Register");
+    private By loginLink = By.linkText("Log In");
+    private By logoutLink = By.linkText("Log Out");
+    private By welcomeMessage = By.cssSelector(".welcome-msg");
+    private By womenMenu = By.linkText("Women");
+    private By womenViewAll = By.linkText("View All Women");
+    private By menMenu = By.linkText("Men");
+    private By menViewAll = By.linkText("View All Men");
+    private By saleMenu = By.linkText("Sale");
+    private By saleViewAll = By.linkText("View All Sale");
 
     public HomePage(WebDriver driver) {
         this.driver = driver;
@@ -26,44 +33,54 @@ public class HomePage {
         this.actions = new Actions(driver);
     }
 
-    public void clickLogin() {
-        WebElement accountBtn = wait.until(ExpectedConditions.elementToBeClickable(account));
-        accountBtn.click();
-
-        WebElement loginLink = wait.until(ExpectedConditions.elementToBeClickable(login));
-        loginLink.click();
+    public void clickAccount() {
+        wait.until(ExpectedConditions.elementToBeClickable(accountLink)).click();
     }
 
     public void clickRegister() {
-        wait.until(ExpectedConditions.elementToBeClickable(account)).click();
-        wait.until(ExpectedConditions.elementToBeClickable(register)).click();
+        clickAccount();
+        wait.until(ExpectedConditions.elementToBeClickable(registerLink)).click();
     }
 
-    public boolean isLoggedIn() {
+    public void clickLogin() {
+        clickAccount();
+        wait.until(ExpectedConditions.elementToBeClickable(loginLink)).click();
+    }
+
+    public void clickLogout() {
+        clickAccount();
+        wait.until(ExpectedConditions.elementToBeClickable(logoutLink)).click();
+    }
+
+    public boolean isUserLoggedIn() {
         try {
-            wait.until(ExpectedConditions.elementToBeClickable(account)).click();
-            Thread.sleep(500);
-            return driver.findElements(logout).size() > 0;
+            clickAccount();
+            return driver.findElements(logoutLink).size() > 0;
         } catch (Exception e) {
             return false;
         }
     }
 
-    public void goToWomen() {
-        driver.get("https://ecommerce.tealiumdemo.com/women.html");
-        wait.until(ExpectedConditions.urlContains("women"));
-        System.out.println("Successfully navigated to Women section");
+    public String getWelcomeMessage() {
+        try {
+            return wait.until(ExpectedConditions.visibilityOfElementLocated(welcomeMessage)).getText();
+        } catch (Exception e) {
+            return "";
+        }
     }
 
-    public void goToMen() {
-        driver.get("https://ecommerce.tealiumdemo.com/men.html");
-        wait.until(ExpectedConditions.urlContains("men"));
-        System.out.println("Successfully navigated to Men section");
+    public void navigateToWomenSection() {
+        actions.moveToElement(driver.findElement(womenMenu)).perform();
+        wait.until(ExpectedConditions.elementToBeClickable(womenViewAll)).click();
     }
 
-    public void goToSale() {
-        driver.get("https://ecommerce.tealiumdemo.com/sale.html");
-        wait.until(ExpectedConditions.urlContains("sale"));
-        System.out.println("Successfully navigated to Sale section");
+    public void navigateToMenSection() {
+        actions.moveToElement(driver.findElement(menMenu)).perform();
+        wait.until(ExpectedConditions.elementToBeClickable(menViewAll)).click();
+    }
+
+    public void navigateToSaleSection() {
+        actions.moveToElement(driver.findElement(saleMenu)).perform();
+        wait.until(ExpectedConditions.elementToBeClickable(saleViewAll)).click();
     }
 }
